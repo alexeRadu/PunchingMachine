@@ -7,8 +7,14 @@ Python 2.7
 
 Libraries:
 <ul>
-  <li></li>
-  <li></li>
+  <li>pyserial - serial communication</li>
+  <li>pyside - gui library</li>
+</ul>
+
+Possible additional libraries (for other mathematical processing):
+<ul>
+  <li>numpy</li>
+  <li>scipy</li>
 </ul>
 
 <h2>Running it</h2>
