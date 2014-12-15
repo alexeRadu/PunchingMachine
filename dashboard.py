@@ -23,6 +23,10 @@ class Dashboard(QtGui.QMainWindow):
 		self.serial_interface = None
 		self.compute_engine = None
 
+		self.pause_flag = False
+
+		self.sample_number = 1
+
 	def set_references(self, serial_interface, compute_engine):
 		self.serial_interface = serial_interface
 		self.compute_engine = compute_engine
@@ -33,15 +37,15 @@ class Dashboard(QtGui.QMainWindow):
 		self.plot_widget = pg.GraphicsWindow(parent=self)
 		
 		self.x_plot = self.plot_widget.addPlot(title='X Axis', pen = (1, 3))
-		self.x_plot.setRange(yRange=(-16.0, 16.0))
+		self.x_plot.setRange(yRange=(-20.0, 20.0))
 		self.x_curve = self.x_plot.plot()
 
 		self.y_plot = self.plot_widget.addPlot(title='Y Axis', pen = (2, 3))
-		self.y_plot.setRange(yRange=(-16.0, 16.0))
+		self.y_plot.setRange(yRange=(-20.0, 20.0))
 		self.y_curve = self.y_plot.plot()
 
 		self.z_plot = self.plot_widget.addPlot(title='Z Axis')
-		self.z_plot.setRange(yRange=(-16.0, 16.0))
+		self.z_plot.setRange(yRange=(-20.0, 20.0))
 		self.z_curve = self.z_plot.plot()
 
 		self.x_data = []
@@ -61,6 +65,10 @@ class Dashboard(QtGui.QMainWindow):
 		self.clearAction = QtGui.QAction(QtGui.QIcon('icons/clear.png'), 'Clear', self, triggered=self.clear_plot)
 		self.clearAction.setStatusTip('Clear the graphs')
 
+		self.pauseAction = QtGui.QAction(QtGui.QIcon('icons/pause.png'), 'Pause', self, triggered=self.pause)
+
+		self.saveAction = QtGui.QAction(QtGui.QIcon('icons/save.png'), 'Save', self, triggered=self.save)
+
 		self.fullscreeAction = QtGui.QAction(QtGui.QIcon('icons/fullscreen.gif'), 'Fullscreen', self, triggered = self.fullscreen)
 		self.in_fullscreen = False;
 
@@ -76,6 +84,10 @@ class Dashboard(QtGui.QMainWindow):
 		toolbar.addAction(self.fullscreeAction)
 
 		toolbar.addSeparator()
+		toolbar.addAction(self.pauseAction)
+		toolbar.addAction(self.saveAction)
+
+		toolbar.addSeparator()
 		toolbar.addAction(self.aboutAction)
 
 	def fullscreen(self):
@@ -86,13 +98,50 @@ class Dashboard(QtGui.QMainWindow):
 			self.in_fullscreen = True
 			self.showFullScreen()
 
+	def pause(self):
+		if self.pause_flag:
+			self.pause_flag = False
+		else:
+			self.pause_flag = True
+
+	def save(self):
+		self.pause()
+
+		fname, _ = QtGui.QFileDialog.getSaveFileName(self, 'Save Samples As...', './samples')
+
+		if fname != '':
+
+			try:
+				f = open(fname, 'w')
+				f.write('# x samples\n\n')
+
+				self.save_data(self.x_data, f)
+				
+				f.write('# y samples\n\n')
+				self.save_data(self.y_data, f)
+
+				f.write('# z samples\n\n')
+				self.save_data(self.z_data, f)
+
+				f.close()
+			except IOError:
+				pass
+
+		self.pause()
+
+	def save_data(self, vector, fd):
+		print [int(a * 2**8) for a in vector[:100]]
+
+		fd.write(''.join([str(int(a * 2**8)) + ', ' for a in vector]))
+		fd.write('\n\n\n')
+
 
 	def about(self):
 		QtGui.QMessageBox.about(self, "Thanks",
 			"<p>The Punching Machine </p><br> 		\
 			 <p>Main contributors:<br>				\
 			 - Macarascu Cristian (a.k.a. the boss)<br>	\
-			 - others<br></p>")
+			 - Mihai <br></p>")
 
 	def closeEvent(self, event):
 
@@ -106,6 +155,10 @@ class Dashboard(QtGui.QMainWindow):
 
 
 	def update_plot(self, x, y, z):
+
+		if self.pause_flag:
+			return
+
 		self.x_data += x
 		self.y_data += y
 		self.z_data += z
