@@ -2,6 +2,7 @@ from PySide import QtGui
 import pyqtgraph as pg
 import serialInterface
 import computeEngine
+import string
 
 DEFAULT_DATA_LENGTH = 9600
 
@@ -26,6 +27,8 @@ class Dashboard(QtGui.QMainWindow):
 		self.pause_flag = False
 
 		self.sample_number = 1
+
+
 
 	def set_references(self, serial_interface, compute_engine):
 		self.serial_interface = serial_interface
@@ -130,9 +133,10 @@ class Dashboard(QtGui.QMainWindow):
 		self.pause()
 
 	def save_data(self, vector, fd):
-		print [int(a * 2**8) for a in vector[:100]]
+		# print [int(a * 2**8) for a in vector[:100]]
 
-		fd.write(''.join([str(int(a * 2**8)) + ', ' for a in vector]))
+		# fd.write(''.join([str(int(a * 2**8)) + ', ' for a in vector]))
+		fd.write(','.join([str(a) for a in vector]))
 		fd.write('\n\n\n')
 
 

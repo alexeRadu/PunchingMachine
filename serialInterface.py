@@ -102,7 +102,8 @@ class SerialInterface(threading.Thread):
 			if len(line) != 6:
 				continue
 
-			vector = [a * 0.004 for a in struct.unpack('<hhh', line)]
+			# vector = [a * 0.004 for a in struct.unpack('<hhh', line)]
+			vector = [a * 2**(-8) for a in struct.unpack('<hhh', line)]
 
 			break
 
