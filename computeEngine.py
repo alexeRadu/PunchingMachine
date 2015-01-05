@@ -2,8 +2,6 @@ import threading
 import serialInterface
 import dashboard as dash
 import Display as display
-import numpy as np
-import scipy as sp
 
 DEFAULT_DATA_LENGTH 	= 1024
 
